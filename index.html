@@ -3,75 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>金門之再次823 - 兵棋推演 (HOI 風格)</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    
+    <title>金門之再次823 - 兵棋推演</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="top-bar">
-        <h1>金門之再次823</h1>
-        <div id="turn-indicator">
-            <span>回合: <span id="turn-count">1</span></span>
-            <span class="divider">|</span>
-            <span>當前玩家: <span id="current-player">Blue</span></span>
-        </div>
-        <div class="controls">
-            <button id="btn-end-turn">結束回合</button>
+    <div id="main-menu">
+        <div class="menu-content">
+            <h1 class="game-title">金門之再次823</h1>
+            <p class="game-subtitle">K-823 WARGAME ENGINE</p>
+            <button id="btn-start-new-game">開始推演</button>
+            <div class="menu-footer">
+                <p>M-001 / VanillaJS 1.0</p>
+            </div>
         </div>
     </div>
 
-    <div id="game-container">
-        <div id="map-container">
+    <div id="ui-container">
+        
+        <header id="control-panel">
+            <div class="panel-left">
+                <h1 class="header-title">作戰指揮部</h1>
+            </div>
+            <div class="panel-center">
+                <div id="turn-indicator">
+                    <span>回合: <span id="turn-count">1</span></span>
+                    <span>|</span>
+                    <span>當前行動: <span id="current-player">Blue</span></span>
+                </div>
+            </div>
+            <div class="panel-right controls">
+                <button id="btn-end-turn" title="結束回合">結束回合</button>
+                <button id="btn-save-game" title="儲存戰局">儲存</button>
+                <label for="load-game-input" class="btn-load-game" title="載入戰局">
+                    載入
+                    <input type="file" id="load-game-input" accept=".json">
+                </label>
+                <button id="btn-restart-game" title="重新開始">重啟</button>
+            </div>
+        </header>
+
+        <main id="map-container">
             <canvas id="map-canvas"></canvas>
             <div id="unit-layer"></div>
-        </div>
+        </main>
 
         <aside id="info-panel">
             <div class="panel-header">
-                <h3>單位資訊</h3>
+                <h3>單位情報</h3>
             </div>
-            <div id="unit-info-content" class="panel-content">
+            <div id="unit-info-content" class="panel-body">
                 <p>請點選一個單位以查看詳細資訊。</p>
             </div>
-            <div class.panel-header">
+            <div class="panel-header">
                 <h4>戰鬥模擬</h4>
             </div>
-            <div id="combat-preview" class="panel-content">
+            <div id="combat-preview" class="panel-body">
                 <div id="combat-preview-content"></div>
             </div>
         </aside>
 
-        <aside id="left-panel">
-            <div class="panel-header">
-                <h3>戰局控制</h3>
-            </div>
-            <div class="panel-content controls-vertical">
-                <button id="btn-save-game">
-                    <span class="icon">💾</span> 儲存戰局
-                </button>
-                <label for="load-game-input" class="btn-load-game">
-                    <span class="icon">📂</span> 載入戰局
-                    <input type="file" id="load-game-input" accept=".json">
-                </label>
-                <button id="btn-restart-game">
-                    <span class="icon">🔄</span> 重新開始
-                </button>
-            </div>
-        </aside>
-
         <footer id="log-panel">
-            <div class="panel-header">
-                <h4>行動紀錄</h4>
-            </div>
-            <div id="action-log" class="panel-content">
-                <p>[系統] 遊戲開始。藍軍回合。</p>
+            <div id="action-log">
+                <p>[系統] 等待作戰指令...</p>
             </div>
         </footer>
+
     </div>
 
     <div id="context-menu">
@@ -79,7 +76,6 @@
             <li id="menu-move">移動</li>
             <li id="menu-attack">攻擊</li>
             <li id="menu-wait">待命</li>
-            <li class="divider"></li>
             <li id="menu-edit">編輯屬性</li>
             <li id="menu-delete">刪除單位</li>
         </ul>
@@ -89,16 +85,36 @@
         <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#00aaff" flood-opacity="1"/>
+                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="var(--color-blue)" flood-opacity="1"/>
                 </filter>
                 <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ff4444" flood-opacity="1"/>
+                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="var(--color-red)" flood-opacity="1"/>
                 </filter>
             </defs>
-            <path d="M10 10 H90 L90 70 H10 Z" fill="#222" stroke-width="2" class="badge-frame" />
-            <rect x="12" y="12" width="76" height="10" class="badge-faction-color" />
-            <text x="50" y="45" font-size="20" fill="#fff" text-anchor="middle" class="badge-level-text">LVL</text>
-            <text x="50" y="65" font-size="12" fill="#0f0" text-anchor="middle" class="badge-stats-hp">HP: 10/10</text>
+            
+            <path class="badge-frame" 
+                  fill="var(--color-panel-light)" 
+                  stroke-width="4" />
+            
+            <text x="50" y="35" 
+                  font-size="24" 
+                  fill="var(--color-text)" 
+                  text-anchor="middle" 
+                  font-weight="bold"
+                  class="badge-level-symbol">
+                LVL
+            </text>
+
+            <text x="50" y="60" 
+                  font-size="16" 
+                  fill="var(--color-text-dim)" 
+                  text-anchor="middle"
+                  class="badge-unit-type">
+                INF
+            </text>
+            
+            <rect x="20" y="68" width="60" height="8" fill="#111" />
+            <rect x="20" y="68" width="60" height="8" fill="#0f0" class="badge-stats-hp-bar" />
         </svg>
     </template>
 
