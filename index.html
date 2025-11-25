@@ -3,52 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>金門之再次823 - 兵棋推演</title>
+    <title>金門之再次823 - 兵棋推演 (HOI 風格)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="ui-container">
-        
-        <div id="control-panel">
-            <h1>金門之再次823</h1>
-            <div class="controls">
-                <button id="btn-end-turn">結束回合</button>
-                <button id="btn-save-game">儲存戰局</button>
-                <label for="load-game-input" class="btn-load-game">
-                    載入戰局
-                    <input type="file" id="load-game-input" accept=".json">
-                </label>
-                <button id="btn-restart-game">重新開始</button>
-            </div>
-            <div id="turn-indicator">
-                <span>回合: <span id="turn-count">1</span></span>
-                <span>當前玩家: <span id="current-player">Blue</span></span>
-            </div>
+    <div id="top-bar">
+        <h1>金門之再次823</h1>
+        <div id="turn-indicator">
+            <span>回合: <span id="turn-count">1</span></span>
+            <span class="divider">|</span>
+            <span>當前玩家: <span id="current-player">Blue</span></span>
         </div>
+        <div class="controls">
+            <button id="btn-end-turn">結束回合</button>
+        </div>
+    </div>
 
+    <div id="game-container">
         <div id="map-container">
             <canvas id="map-canvas"></canvas>
             <div id="unit-layer"></div>
         </div>
 
         <aside id="info-panel">
-            <h3>單位資訊</h3>
-            <div id="unit-info-content">
+            <div class="panel-header">
+                <h3>單位資訊</h3>
+            </div>
+            <div id="unit-info-content" class="panel-content">
                 <p>請點選一個單位以查看詳細資訊。</p>
             </div>
-            <div id="combat-preview">
+            <div class.panel-header">
                 <h4>戰鬥模擬</h4>
+            </div>
+            <div id="combat-preview" class="panel-content">
                 <div id="combat-preview-content"></div>
             </div>
         </aside>
 
+        <aside id="left-panel">
+            <div class="panel-header">
+                <h3>戰局控制</h3>
+            </div>
+            <div class="panel-content controls-vertical">
+                <button id="btn-save-game">
+                    <span class="icon">💾</span> 儲存戰局
+                </button>
+                <label for="load-game-input" class="btn-load-game">
+                    <span class="icon">📂</span> 載入戰局
+                    <input type="file" id="load-game-input" accept=".json">
+                </label>
+                <button id="btn-restart-game">
+                    <span class="icon">🔄</span> 重新開始
+                </button>
+            </div>
+        </aside>
+
         <footer id="log-panel">
-            <div id="action-log">
+            <div class="panel-header">
+                <h4>行動紀錄</h4>
+            </div>
+            <div id="action-log" class="panel-content">
                 <p>[系統] 遊戲開始。藍軍回合。</p>
             </div>
         </footer>
-
     </div>
 
     <div id="context-menu">
@@ -56,6 +79,7 @@
             <li id="menu-move">移動</li>
             <li id="menu-attack">攻擊</li>
             <li id="menu-wait">待命</li>
+            <li class="divider"></li>
             <li id="menu-edit">編輯屬性</li>
             <li id="menu-delete">刪除單位</li>
         </ul>
