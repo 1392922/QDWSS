@@ -1,65 +1,285 @@
-body {
-    font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
-    display: flex;
-    background-color: #333;
-    color: #eee;
+/* 基本重設與全域設定 */
+:root {
+    --color-blue: #00aaff;
+    --color-red: #ff4444;
+    --color-bg: #1a1a1a;
+    --color-panel: #2a2a2a;
+    --color-border: #444;
+    --color-text: #eee;
+    --hex-size: 40px; /* 六角格半徑 */
+}
+
+* {
     margin: 0;
-    overflow: hidden; /* 防止滾動 */
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-#game-container {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden; /* 允許畫布縮放/平移 */
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
-#game-canvas {
-    background-color: #5a8; /* 簡易的草地綠 */
-    border: 2px solid #111;
-}
-
-.side-panel {
-    width: 250px;
-    background-color: #222;
-    border-left: 2px solid #111;
+/* --- 主要 UI 佈局 --- */
+#ui-container {
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "main   sidebar"
+        "footer footer";
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr 300px;
+    width: 100vw;
     height: 100vh;
-    overflow-y: auto;
-    padding: 10px;
 }
 
-#toolbar {
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
+/* --- 控制面板 (Header) --- */
+#control-panel {
+    grid-area: header;
+    background: var(--color-panel);
+    border-bottom: 2px solid var(--color-border);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     z-index: 100;
 }
 
-/* ... (其他如按鈕、彈窗的樣式) ... */
+#control-panel h1 {
+    font-size: 1.2rem;
+    margin-right: 20px;
+}
 
-.modal {
-    display: none; /* 預設隱藏 */
-    position: fixed;
+#control-panel .controls {
+    display: flex;
+    gap: 10px;
+}
+
+#control-panel button, .btn-load-game {
+    background: #555;
+    color: var(--color-text);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+#control-panel button:hover {
+    background: #666;
+}
+#control-panel #btn-end-turn {
+    background: #007acc;
+}
+#control-panel #btn-end-turn:hover {
+    background: #008fdd;
+}
+#load-game-input {
+    display: none;
+}
+
+#turn-indicator {
+    font-size: 0.9rem;
+}
+#turn-indicator #current-player.blue { color: var(--color-blue); }
+#turn-indicator #current-player.red { color: var(--color-red); }
+
+/* --- 地圖容器 (Main) --- */
+#map-container {
+    grid-area: main;
+    position: relative;
+    overflow: hidden; /* 確保 Canvas 和 Unit-Layer 不會溢出 */
+    background: #000;
+    cursor: grab;
+}
+#map-container:active {
+    cursor: grabbing;
+}
+
+#map-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#unit-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    /* 用於 pan/zoom 的 transform 會由 JS 設置 */
+    transform-origin: 0 0;
+    pointer-events: none; /* 容器本身不接收事件 */
+}
+
+/* --- 單位元素 --- */
+.unit {
+    position: absolute;
+    width: var(--hex-size);
+    height: calc(var(--hex-size) * 0.866); /* 約等於 sqrt(3)/2 * 80px */
+    transform: translate(-50%, -50%); /* 中心點對齊 */
+    cursor: pointer;
+    pointer-events: auto; /* 單位本身接收事件 */
+    transition: transform 0.2s ease-out; /* 移動動畫 */
+}
+
+.unit svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible; /* 確保光暈可見 */
+}
+
+/* 陣營顏色 */
+.unit.faction-blue .badge-frame { stroke: var(--color-blue); }
+.unit.faction-blue .badge-faction-color { fill: var(--color-blue); }
+.unit.faction-blue.selected { filter: url(#glow-blue); }
+
+.unit.faction-red .badge-frame { stroke: var(--color-red); }
+.unit.faction-red .badge-faction-color { fill: var(--color-red); }
+.unit.faction-red.selected { filter: url(#glow-red); }
+
+/* 單位狀態 */
+.unit.moved-or-acted {
+    opacity: 0.6;
+}
+.unit.dragging {
     z-index: 1000;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #444;
-    padding: 20px;
-    border: 1px solid #888;
+    opacity: 0.8;
+    transition: none; /* 拖曳時移除動畫 */
 }
 
-/* 北約圖標簡易樣式 (將由 Canvas 繪製) */
-.team-color {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border: 1px solid #fff;
-    margin-right: 5px;
+/* --- 資訊面板 (Sidebar) --- */
+#info-panel {
+    grid-area: sidebar;
+    background: var(--color-panel);
+    border-left: 2px solid var(--color-border);
+    padding: 15px;
+    overflow-y: auto;
+    z-index: 50;
 }
-.team-color.blue { background-color: #007bff; }
-.team-color.red { background-color: #dc3545; }
+#info-panel h3 {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+}
+#unit-info-content {
+    margin-top: 15px;
+}
+#unit-info-content .unit-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+#unit-info-content .unit-name.blue { color: var(--color-blue); }
+#unit-info-content .unit-name.red { color: var(--color-red); }
+
+#unit-info-content .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+.stats-grid .stat-item {
+    background: #333;
+    padding: 8px;
+    border-radius: 4px;
+}
+.stat-item label {
+    font-size: 0.8rem;
+    color: #aaa;
+    display: block;
+}
+.stat-item input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-size: 1rem;
+    padding: 5px 0;
+    border-bottom: 1px solid #555;
+}
+.stat-item input:focus {
+    outline: none;
+    border-bottom: 1px solid var(--color-blue);
+}
+
+#combat-preview {
+    margin-top: 20px;
+}
+#combat-preview h4 {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 5px;
+}
+
+/* --- 紀錄面板 (Footer) --- */
+#log-panel {
+    grid-area: footer;
+    background: #222;
+    border-top: 1px solid var(--color-border);
+    height: 120px;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 0.9rem;
+    z-index: 50;
+}
+#action-log p {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+#action-log .log-blue { color: var(--color-blue); }
+#action-log .log-red { color: var(--color-red); }
+#action-log .log-system { color: #aaa; }
+#action-log .log-combat { color: #f9a825; font-weight: bold; }
+
+/* --- 右鍵選單 --- */
+#context-menu {
+    position: fixed;
+    display: none;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    z-index: 1001;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+#context-menu ul {
+    list-style: none;
+}
+#context-menu li {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+#context-menu li:hover {
+    background: #444;
+}
+#context-menu li.disabled {
+    color: #777;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+/* --- 響應式 (簡易) --- */
+@media (max-width: 768px) {
+    #ui-container {
+        grid-template-areas:
+            "header"
+            "main"
+            "sidebar"
+            "footer";
+        grid-template-rows: auto 1fr auto auto;
+        grid-template-columns: 1fr;
+    }
+    #info-panel {
+        height: 250px; /* 在行動裝置上給予固定高度 */
+        border-left: none;
+        border-top: 2px solid var(--color-border);
+    }
+    #log-panel {
+        height: 100px;
+    }
+    #control-panel {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
