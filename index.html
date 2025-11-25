@@ -3,60 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>兵棋推演：金門之再次823</title>
+    <title>金門之再次823 - 兵棋推演</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-    </div>
-
-    <div id="toolbar">
-        <button id="btn-roll-dice">擲骰 (D6)</button>
-        <button id="btn-add-feature">新增地形</button>
-        <button id="btn-add-supply">拉補給線</button>
-        <button id="btn-launch-missile">發射飛彈</button>
-        <span id="scale-indicator">比例尺: 1格 = 1km</span>
-    </div>
-
-    <div id="blue-panel" class="side-panel">
-        <h3><span class="team-color blue"></span>中華民國國軍 (藍軍)</h3>
-        <div id="blue-unit-generator" class="unit-generator">
-            <h4>生成單位</h4>
+    <div id="ui-container">
+        
+        <div id="control-panel">
+            <h1>金門之再次823</h1>
+            <div class="controls">
+                <button id="btn-end-turn">結束回合</button>
+                <button id="btn-save-game">儲存戰局</button>
+                <label for="load-game-input" class="btn-load-game">
+                    載入戰局
+                    <input type="file" id="load-game-input" accept=".json">
+                </label>
+                <button id="btn-restart-game">重新開始</button>
             </div>
-        <div id="blue-unit-list" class="unit-list">
+            <div id="turn-indicator">
+                <span>回合: <span id="turn-count">1</span></span>
+                <span>當前玩家: <span id="current-player">Blue</span></span>
             </div>
-    </div>
-
-    <div id="red-panel" class="side-panel">
-        <h3><span class="team-color red"></span>共軍 (紅軍)</h3>
-        <div id="red-unit-generator" class="unit-generator">
-            <h4>生成單位</h4>
-            </div>
-        <div id="red-unit-list" class="unit-list">
-            </div>
-    </div>
-
-    <div id="unit-editor-modal" class="modal">
-        <div class="modal-content">
-            <h3>編輯算子</h3>
-            <label>名稱: <input type="text" id="edit-name"></label>
-            <label>攻擊: <input type="number" id="edit-atk"></label>
-            <label>防禦: <input type="number" id="edit-def"></label>
-            <label>移動: <input type="number" id="edit-mov"></label>
-            <label>指揮: <input type="number" id="edit-cmd"></label>
-            <label>編制: <select id="edit-echelon"></select></label>
-            <button id="btn-save-unit">儲存</button>
-            <button id="btn-delete-unit">刪除</button>
-            <button id="btn-close-modal">關閉</button>
         </div>
+
+        <div id="map-container">
+            <canvas id="map-canvas"></canvas>
+            <div id="unit-layer"></div>
+        </div>
+
+        <aside id="info-panel">
+            <h3>單位資訊</h3>
+            <div id="unit-info-content">
+                <p>請點選一個單位以查看詳細資訊。</p>
+            </div>
+            <div id="combat-preview">
+                <h4>戰鬥模擬</h4>
+                <div id="combat-preview-content"></div>
+            </div>
+        </aside>
+
+        <footer id="log-panel">
+            <div id="action-log">
+                <p>[系統] 遊戲開始。藍軍回合。</p>
+            </div>
+        </footer>
+
     </div>
 
-    <script src="js/map.js"></script>
-    <script src="js/unit.js"></script>
-    <script src="js/mechanics.js"></script>
-    <script src="js/controls.js"></script>
-    <script src="js/app.js"></script>
+    <div id="context-menu">
+        <ul>
+            <li id="menu-move">移動</li>
+            <li id="menu-attack">攻擊</li>
+            <li id="menu-wait">待命</li>
+            <li id="menu-edit">編輯屬性</li>
+            <li id="menu-delete">刪除單位</li>
+        </ul>
+    </div>
+
+    <template id="unit-badge-template">
+        <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#00aaff" flood-opacity="1"/>
+                </filter>
+                <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ff4444" flood-opacity="1"/>
+                </filter>
+            </defs>
+            <path d="M10 10 H90 L90 70 H10 Z" fill="#222" stroke-width="2" class="badge-frame" />
+            <rect x="12" y="12" width="76" height="10" class="badge-faction-color" />
+            <text x="50" y="45" font-size="20" fill="#fff" text-anchor="middle" class="badge-level-text">LVL</text>
+            <text x="50" y="65" font-size="12" fill="#0f0" text-anchor="middle" class="badge-stats-hp">HP: 10/10</text>
+        </svg>
+    </template>
+
+    <script src="main.js" type="module"></script>
 </body>
 </html>
