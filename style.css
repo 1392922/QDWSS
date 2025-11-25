@@ -1,27 +1,24 @@
-/*
- * style.css (Hearts of Iron 風格主題)
- * 使用 'Oswald' 和 'Noto Sans TC' 字體
+/* * 樣式表 (HoI/NATO 風格)
  */
 
-/* --- 1. 全域與變數 --- */
+/* --- 基本重設與全域設定 --- */
 :root {
-    --color-blue: #00aaff;
-    --color-red: #ff4444;
+    /* 色票 (仿 HoI/NATO 軍事風格) */
+    --color-blue: #4d94ff;     /* 北約藍 */
+    --color-red: #ff4d4d;       /* 北約紅 */
+    --color-green-hp: #00c853;
+    --color-bg: #1e2124;        /* 深灰背景 */
+    --color-panel: #2a2d31;     /* 面板背景 */
+    --color-panel-light: #36393f; /* 較淺面板 (用於單位) */
+    --color-border: #4f545c;    /* 邊框 */
+    --color-text: #ddd;         /* 主要文字 */
+    --color-text-dim: #999;     /* 次要文字 */
+    --color-highlight: #f9a825; /* 高亮 (黃) */
+
+    --font-main: "Noto Sans TC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-header: "Impact", "Arial Black", sans-serif; /* 仿 HoI 標題 */
     
-    /* HOI 風格色盤 */
-    --color-bg: #1e1e1e; /* 主背景 (深灰) */
-    --color-panel-bg: #3c3c3c; /* 面板背景 (中灰) */
-    --color-panel-header: #2a2a2a; /* 面板標題 (深灰) */
-    --color-border-light: #555; /* 亮邊框 */
-    --color-border-dark: #111; /* 暗邊框 */
-    --color-text-light: #f0f0f0; /* 亮文字 (米白) */
-    --color-text-dark: #aaaaaa; /* 暗文字 (灰色) */
-    --color-accent: #b08b3a; /* 強調色 (暗金) */
-
-    --font-heading: 'Oswald', 'Noto Sans TC', sans-serif;
-    --font-body: 'Noto Sans TC', sans-serif;
-
-    --hex-size: 40px; /* 六角格半徑 */
+    --hex-size: 50px; /* 六角格半徑 (稍微加大) */
 }
 
 * {
@@ -35,300 +32,171 @@ html, body {
     height: 100%;
     overflow: hidden;
     background-color: var(--color-bg);
-    color: var(--color-text-light);
-    font-family: var(--font-body);
-    font-size: 14px;
-    
-    /* 仿舊背景紋理 */
-    background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
-    background-size: 2px 2px;
+    color: var(--color-text);
+    font-family: var(--font-main);
 }
 
-/* --- 2. 佈局 (Layout) --- */
+button, .btn-load-game {
+    background: var(--color-panel-light);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: 8px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: background-color 0.2s, color 0.2s;
+}
+button:hover, .btn-load-game:hover {
+    background: var(--color-border);
+    color: #fff;
+}
+#load-game-input { display: none; }
 
-/* 頂部資訊列 */
-#top-bar {
+/* --- 主選單 (新) --- */
+#main-menu {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 40px;
-    background: var(--color-panel-header);
-    border-bottom: 2px solid var(--color-border-dark);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    height: 100%;
+    background: var(--color-bg) url('https://upload.wikimedia.org/wikipedia/commons/5/5f/Contour_map_lines.svg') center/cover;
+    background-blend-mode: overlay;
     display: flex;
     align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+#main-menu.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.menu-content {
+    text-align: center;
+    background: rgba(42, 45, 49, 0.85);
+    padding: 40px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+.game-title {
+    font-family: var(--font-header);
+    font-size: 4rem;
+    color: #fff;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0px #000;
+}
+.game-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-dim);
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+}
+#btn-start-new-game {
+    font-size: 1.2rem;
+    padding: 15px 30px;
+    background: var(--color-highlight);
+    border-color: #000;
+    color: #000;
+    font-weight: bold;
+}
+#btn-start-new-game:hover {
+    background: #ffc107;
+    color: #000;
+}
+.menu-footer {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 0.8rem;
+    color: var(--color-text-dim);
+}
+
+
+/* --- 主 UI 佈局 (仿 HoI) --- */
+#ui-container {
+    display: none; /* 預設隱藏，由 JS 啟動 */
+    grid-template-areas:
+        "header header"
+        "main   sidebar"
+        "footer footer";
+    grid-template-rows: 50px 1fr 120px; /* 頂部 50, 底部 120 */
+    grid-template-columns: 1fr 350px; /* 側邊欄 350px */
+    width: 100vw;
+    height: 100vh;
+}
+
+/* --- 控制面板 (Header) --- */
+#control-panel {
+    grid-area: header;
+    background: var(--color-panel);
+    border-bottom: 2px solid #000;
     padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     z-index: 100;
 }
-#top-bar h1 {
-    font-family: var(--font-heading);
+.header-title {
+    font-family: var(--font-header);
     font-size: 1.5rem;
-    color: var(--color-text-light);
-    margin-right: 20px;
+    color: var(--color-text);
 }
 #turn-indicator {
-    font-family: var(--font-heading);
+    display: flex;
+    gap: 15px;
     font-size: 1rem;
-    color: var(--color-text-dark);
+    align-items: center;
 }
-#turn-indicator .divider {
-    margin: 0 10px;
+#turn-indicator #current-player.blue { color: var(--color-blue); font-weight: bold; }
+#turn-indicator #current-player.red { color: var(--color-red); font-weight: bold; }
+#control-panel .controls {
+    display: flex;
+    gap: 10px;
 }
-#turn-indicator #current-player.blue { color: var(--color-blue); }
-#turn-indicator #current-player.red { color: var(--color-red); }
-#top-bar .controls {
-    margin-left: auto;
+#control-panel button, #control-panel .btn-load-game {
+    padding: 6px 10px;
 }
+#btn-end-turn {
+    background: #007acc;
+    border-color: #000;
+    color: #fff;
+    font-weight: bold;
+}
+#btn-end-turn:hover { background: #008fdd; }
 
-/* 主遊戲容器 (排除頂部) */
-#game-container {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    padding-top: 40px; /* 避開頂部欄 */
-}
-
-/* 地圖容器 */
+/* --- 地圖容器 (Main) --- */
 #map-container {
-    position: absolute;
-    top: 40px;
-    left: 200px; /* 避開左側欄 */
-    right: 300px; /* 避開右側欄 */
-    bottom: 120px; /* 避開底部欄 */
+    grid-area: main;
+    position: relative;
     overflow: hidden;
     background: #000;
     cursor: grab;
-    
-    /* 模擬 HOI 地圖邊框 */
-    border: 2px solid var(--color-border-dark);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
 }
 #map-container:active { cursor: grabbing; }
 
-#map-canvas, #unit-layer {
+#map-canvas {
     position: absolute;
     top: 0;
     left: 0;
-    transform-origin: 0 0;
-}
-#map-canvas { z-index: 1; }
-#unit-layer { z-index: 2; pointer-events: none; }
-
-
-/* --- 3. 面板 (Panels) --- */
-
-/* 面板通用樣式 */
-.panel-header {
-    background: var(--color-panel-header);
-    padding: 8px 12px;
-    border-bottom: 2px solid var(--color-border-dark);
-}
-.panel-header h3, .panel-header h4 {
-    font-family: var(--font-heading);
-    color: var(--color-accent);
-    text-transform: uppercase;
-    font-size: 1rem;
-}
-.panel-content {
-    padding: 10px;
-    overflow-y: auto;
+    z-index: 1;
 }
 
-/* 左側面板 */
-#left-panel {
+#unit-layer {
     position: absolute;
-    top: 40px;
+    top: 0;
     left: 0;
-    width: 200px;
-    bottom: 0; /* 填滿左側 */
-    background: var(--color-panel-bg);
-    border-right: 2px solid var(--color-border-dark);
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-}
-#left-panel .panel-content {
-    flex-grow: 1;
+    z-index: 2;
+    transform-origin: 0 0;
+    pointer-events: none;
 }
 
-/* 右側資訊面板 */
-#info-panel {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    width: 300px;
-    bottom: 0; /* 填滿右側 */
-    background: var(--color-panel-bg);
-    border-left: 2px solid var(--color-border-dark);
-    box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-}
-#info-panel .panel-content {
-    flex-grow: 1;
-}
-
-/* 底部紀錄面板 */
-#log-panel {
-    position: absolute;
-    bottom: 0;
-    left: 200px; /* 避開左側欄 */
-    right: 300px; /* 避開右側欄 */
-    height: 120px;
-    background: var(--color-panel-bg);
-    border-top: 2px solid var(--color-border-dark);
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-}
-#action-log {
-    height: 100%; /* 填滿剩餘空間 */
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-/* --- 4. 元件 (Components) --- */
-
-/* 按鈕 (HOI 風格) */
-button, .btn-load-game {
-    display: block;
-    width: 100%;
-    background-color: #3a3a3a;
-    background-image: linear-gradient(to bottom, #5a5a5a 0%, #3a3a3a 100%);
-    color: var(--color-text-light);
-    border: 1px solid var(--color-border-dark);
-    border-top-color: var(--color-border-light);
-    padding: 10px;
-    border-radius: 2px;
-    cursor: pointer;
-    font-family: var(--font-heading);
-    font-size: 0.9rem;
-    text-shadow: 1px 1px 1px rgba(0,0,0,0.7);
-    margin-bottom: 8px;
-    text-align: left;
-}
-button:hover, .btn-load-game:hover {
-    background-image: linear-gradient(to bottom, #6b6b6b 0%, #4c4c4c 100%);
-    color: #fff;
-}
-button:active, .btn-load-game:active {
-    background-image: linear-gradient(to top, #6b6b6b 0%, #4c4c4c 100%);
-    border-color: var(--color-border-dark);
-}
-
-/* 頂部結束回合按鈕 */
-#top-bar #btn-end-turn {
-    background-color: #9c2a2a;
-    background-image: linear-gradient(to bottom, #b04b3a 0%, #9c2a2a 100%);
-    color: #fff;
-    width: auto;
-    margin-bottom: 0;
-    text-align: center;
-}
-#top-bar #btn-end-turn:hover {
-    background-image: linear-gradient(to bottom, #c25e4d 0%, #b04b3a 100%);
-}
-
-#load-game-input { display: none; }
-.controls-vertical .icon {
-    margin-right: 8px;
-    font-family: sans-serif; /* 讓 emoji 正常顯示 */
-}
-
-/* 右側資訊面板 */
-#unit-info-content .unit-name {
-    font-size: 1.3rem;
-    font-family: var(--font-heading);
-    margin-bottom: 10px;
-}
-#unit-info-content .unit-name.blue { color: var(--color-blue); }
-#unit-info-content .unit-name.red { color: var(--color-red); }
-
-#unit-info-content .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
-}
-.stats-grid .stat-item {
-    background: #222;
-    padding: 8px;
-    border-radius: 2px;
-    border: 1px solid var(--color-border-dark);
-}
-.stat-item label {
-    font-size: 0.8rem;
-    color: var(--color-text-dark);
-    display: block;
-}
-.stat-item input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--color-text-light);
-    font-size: 1rem;
-    padding: 5px 0;
-    border-bottom: 1px solid #555;
-}
-.stat-item input:focus {
-    outline: none;
-    border-bottom: 1px solid var(--color-accent);
-}
-
-/* 戰鬥預覽 */
-#combat-preview {
-    font-size: 0.9rem;
-}
-
-/* 行動紀錄 */
-#action-log p { margin-bottom: 5px; }
-#action-log .log-blue { color: var(--color-blue); }
-#action-log .log-red { color: var(--color-red); }
-#action-log .log-system { color: var(--color-text-dark); }
-#action-log .log-combat { color: var(--color-accent); font-weight: bold; }
-
-/* 右鍵選單 (HOI 風格) */
-#context-menu {
-    position: fixed;
-    display: none;
-    background: var(--color-panel-bg);
-    border: 1px solid var(--color-border-light);
-    border-top: 1px solid var(--color-border-light);
-    border-bottom: 1px solid var(--color-border-dark);
-    z-index: 1001;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    min-width: 150px;
-}
-#context-menu ul { list-style: none; }
-#context-menu li {
-    padding: 10px 15px;
-    cursor: pointer;
-    color: var(--color-text-light);
-}
-#context-menu li:hover {
-    background: var(--color-accent);
-    color: #000;
-}
-#context-menu li.divider {
-    height: 1px;
-    background: var(--color-border-light);
-    padding: 0;
-}
-#context-menu li.disabled {
-    color: #777;
-    cursor: not-allowed;
-    background: transparent;
-}
-
-/* --- 5. 單位 (Units) --- */
+/* --- NATO 單位徽章 --- */
 .unit {
     position: absolute;
-    width: var(--hex-size);
-    height: calc(var(--hex-size) * 0.866);
+    width: var(--hex-size); /* 寬度 50px */
+    height: calc(var(--hex-size) * 0.8); /* 高度 40px */
     transform: translate(-50%, -50%);
     cursor: pointer;
     pointer-events: auto;
@@ -339,17 +207,24 @@ button:active, .btn-load-game:active {
     height: 100%;
     overflow: visible;
 }
-/* (徽章的 SVG 樣式不變) */
-.unit.faction-blue .badge-frame { stroke: var(--color-blue); }
-.unit.faction-blue .badge-faction-color { fill: var(--color-blue); }
+
+/* 核心：根據陣營切換 SVG 外框形狀 (矩形 vs 菱形) */
+.unit.faction-blue .badge-frame {
+    d: path("M5 5 H95 V75 H5 Z"); /* 矩形 (Friendly) */
+    stroke: var(--color-blue);
+}
+.unit.faction-red .badge-frame {
+    d: path("M50 5 L95 40 L50 75 L5 40 Z"); /* 菱形 (Hostile) */
+    stroke: var(--color-red);
+}
+
+/* 選中光暈 */
 .unit.faction-blue.selected { filter: url(#glow-blue); }
-.unit.faction-red .badge-frame { stroke: var(--color-red); }
-.unit.faction-red .badge-faction-color { fill: var(--color-red); }
 .unit.faction-red.selected { filter: url(#glow-red); }
 
+/* 單位狀態 */
 .unit.moved-or-acted {
-    opacity: 0.6;
-    filter: grayscale(50%); /* 增加灰階以符合 HOI 風格 */
+    opacity: 0.5;
 }
 .unit.dragging {
     z-index: 1000;
@@ -357,55 +232,148 @@ button:active, .btn-load-game:active {
     transition: none;
 }
 
-/* --- 6. 響應式 (RWD) --- */
-@media (max-width: 900px) {
-    /* 在小螢幕上，簡化佈局，左右面板變為浮動或隱藏 */
-    
-    #left-panel {
-        width: 150px; /* 變窄 */
-    }
-    #info-panel {
-        width: 250px; /* 變窄 */
-    }
-    
-    #map-container {
-        left: 150px;
-        right: 250px;
-    }
-    
-    #log-panel {
-        left: 150px;
-        right: 250px;
-    }
-    
-    /* (更小的螢幕需要更激進的 RWD，例如將面板改為可切換顯示) */
+/* --- 資訊面板 (Sidebar) --- */
+#info-panel {
+    grid-area: sidebar;
+    background: var(--color-panel);
+    border-left: 2px solid #000;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+}
+.panel-header {
+    background: #000;
+    padding: 10px 15px;
+}
+.panel-header h3, .panel-header h4 {
+    color: var(--color-highlight);
+    text-transform: uppercase;
+}
+.panel-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
+#unit-info-content .unit-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+#unit-info-content .unit-name.blue { color: var(--color-blue); }
+#unit-info-content .unit-name.red { color: var(--color-red); }
+
+#unit-info-content .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+.stats-grid .stat-item {
+    background: var(--color-bg);
+    padding: 8px;
+    border-radius: 2px;
+}
+.stat-item label {
+    font-size: 0.8rem;
+    color: var(--color-text-dim);
+    display: block;
+}
+.stat-item input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-size: 1rem;
+    padding: 5px 0;
+    border-bottom: 1px solid #555;
+    -moz-appearance: textfield; /* 隱藏 number input 的箭頭 */
+}
+.stat-item input::-webkit-outer-spin-button,
+.stat-item input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.stat-item input:focus {
+    outline: none;
+    border-bottom: 1px solid var(--color-blue);
+}
+
+#combat-preview-content ul {
+    list-style: none;
+    padding-left: 10px;
+    margin-top: 5px;
+}
+#combat-preview-content li {
+    color: var(--color-text-dim);
+}
+
+/* --- 紀錄面板 (Footer) --- */
+#log-panel {
+    grid-area: footer;
+    background: var(--color-panel);
+    border-top: 2px solid #000;
+    height: 120px;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 0.9rem;
+    z-index: 50;
+}
+#action-log p {
+    margin-bottom: 5px;
+    line-height: 1.4;
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: 3px;
+}
+#action-log .log-blue { color: var(--color-blue); }
+#action-log .log-red { color: var(--color-red); }
+#action-log .log-system { color: var(--color-text-dim); }
+#action-log .log-combat { color: var(--color-highlight); font-weight: bold; }
+
+/* --- 右鍵選單 --- */
+#context-menu {
+    position: fixed;
+    display: none;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    z-index: 1001;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+#context-menu ul { list-style: none; }
+#context-menu li {
+    padding: 10px 15px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+#context-menu li:hover { background: #444; }
+#context-menu li.disabled {
+    color: #777;
+    cursor: not-allowed;
+    background: transparent;
+}
+
+/* --- 響應式 (簡易) --- */
 @media (max-width: 768px) {
-    /* 行動裝置：面板堆疊 */
-    #left-panel {
-        top: auto;
-        bottom: 0;
-        width: 100%;
-        height: 150px; /* 變為底部工具列 */
-        border-right: none;
-        border-top: 2px solid var(--color-border-dark);
-        flex-direction: row;
-        padding: 10px;
-    }
-    #left-panel .controls-vertical {
-        display: flex;
-        gap: 10px;
+    #ui-container {
+        grid-template-areas:
+            "header"
+            "main"
+            "sidebar"
+            "footer";
+        grid-template-rows: auto 1fr auto auto;
+        grid-template-columns: 1fr;
     }
     #info-panel {
-        display: none; /* 暫時隱藏，或改為點擊彈出 */
+        height: 250px;
+        border-left: none;
+        border-top: 2px solid #000;
     }
-    #log-panel {
-        display: none; /* 暫時隱藏 */
+    #log-panel { height: 100px; }
+    #control-panel {
+        flex-direction: column;
+        gap: 10px;
+        height: auto;
+        padding-bottom: 10px;
     }
-    #map-container {
-        left: 0;
-        right: 0;
-        bottom: 150px; /* 避開底部工具列 */
-    }
+    .header-title { display: none; }
 }
