@@ -1,11 +1,26 @@
-/* 基本重設與全域設定 */
+/*
+ * style.css (Hearts of Iron 風格主題)
+ * 使用 'Oswald' 和 'Noto Sans TC' 字體
+ */
+
+/* --- 1. 全域與變數 --- */
 :root {
     --color-blue: #00aaff;
     --color-red: #ff4444;
-    --color-bg: #1a1a1a;
-    --color-panel: #2a2a2a;
-    --color-border: #444;
-    --color-text: #eee;
+    
+    /* HOI 風格色盤 */
+    --color-bg: #1e1e1e; /* 主背景 (深灰) */
+    --color-panel-bg: #3c3c3c; /* 面板背景 (中灰) */
+    --color-panel-header: #2a2a2a; /* 面板標題 (深灰) */
+    --color-border-light: #555; /* 亮邊框 */
+    --color-border-dark: #111; /* 暗邊框 */
+    --color-text-light: #f0f0f0; /* 亮文字 (米白) */
+    --color-text-dark: #aaaaaa; /* 暗文字 (灰色) */
+    --color-accent: #b08b3a; /* 強調色 (暗金) */
+
+    --font-heading: 'Oswald', 'Noto Sans TC', sans-serif;
+    --font-body: 'Noto Sans TC', sans-serif;
+
     --hex-size: 40px; /* 六角格半徑 */
 }
 
@@ -13,7 +28,6 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 html, body {
@@ -21,156 +35,215 @@ html, body {
     height: 100%;
     overflow: hidden;
     background-color: var(--color-bg);
-    color: var(--color-text);
+    color: var(--color-text-light);
+    font-family: var(--font-body);
+    font-size: 14px;
+    
+    /* 仿舊背景紋理 */
+    background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+    background-size: 2px 2px;
 }
 
-/* --- 主要 UI 佈局 --- */
-#ui-container {
-    display: grid;
-    grid-template-areas:
-        "header header"
-        "main   sidebar"
-        "footer footer";
-    grid-template-rows: auto 1fr auto;
-    grid-template-columns: 1fr 300px;
-    width: 100vw;
-    height: 100vh;
-}
+/* --- 2. 佈局 (Layout) --- */
 
-/* --- 控制面板 (Header) --- */
-#control-panel {
-    grid-area: header;
-    background: var(--color-panel);
-    border-bottom: 2px solid var(--color-border);
-    padding: 10px 20px;
+/* 頂部資訊列 */
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: var(--color-panel-header);
+    border-bottom: 2px solid var(--color-border-dark);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    padding: 0 20px;
     z-index: 100;
 }
-
-#control-panel h1 {
-    font-size: 1.2rem;
+#top-bar h1 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-text-light);
     margin-right: 20px;
 }
-
-#control-panel .controls {
-    display: flex;
-    gap: 10px;
-}
-
-#control-panel button, .btn-load-game {
-    background: #555;
-    color: var(--color-text);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-#control-panel button:hover {
-    background: #666;
-}
-#control-panel #btn-end-turn {
-    background: #007acc;
-}
-#control-panel #btn-end-turn:hover {
-    background: #008fdd;
-}
-#load-game-input {
-    display: none;
-}
-
 #turn-indicator {
-    font-size: 0.9rem;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: var(--color-text-dark);
+}
+#turn-indicator .divider {
+    margin: 0 10px;
 }
 #turn-indicator #current-player.blue { color: var(--color-blue); }
 #turn-indicator #current-player.red { color: var(--color-red); }
+#top-bar .controls {
+    margin-left: auto;
+}
 
-/* --- 地圖容器 (Main) --- */
-#map-container {
-    grid-area: main;
+/* 主遊戲容器 (排除頂部) */
+#game-container {
     position: relative;
-    overflow: hidden; /* 確保 Canvas 和 Unit-Layer 不會溢出 */
+    width: 100%;
+    height: 100vh;
+    padding-top: 40px; /* 避開頂部欄 */
+}
+
+/* 地圖容器 */
+#map-container {
+    position: absolute;
+    top: 40px;
+    left: 200px; /* 避開左側欄 */
+    right: 300px; /* 避開右側欄 */
+    bottom: 120px; /* 避開底部欄 */
+    overflow: hidden;
     background: #000;
     cursor: grab;
+    
+    /* 模擬 HOI 地圖邊框 */
+    border: 2px solid var(--color-border-dark);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
 }
-#map-container:active {
-    cursor: grabbing;
-}
+#map-container:active { cursor: grabbing; }
 
-#map-canvas {
+#map-canvas, #unit-layer {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
-}
-
-#unit-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    /* 用於 pan/zoom 的 transform 會由 JS 設置 */
     transform-origin: 0 0;
-    pointer-events: none; /* 容器本身不接收事件 */
 }
+#map-canvas { z-index: 1; }
+#unit-layer { z-index: 2; pointer-events: none; }
 
-/* --- 單位元素 --- */
-.unit {
-    position: absolute;
-    width: var(--hex-size);
-    height: calc(var(--hex-size) * 0.866); /* 約等於 sqrt(3)/2 * 80px */
-    transform: translate(-50%, -50%); /* 中心點對齊 */
-    cursor: pointer;
-    pointer-events: auto; /* 單位本身接收事件 */
-    transition: transform 0.2s ease-out; /* 移動動畫 */
+
+/* --- 3. 面板 (Panels) --- */
+
+/* 面板通用樣式 */
+.panel-header {
+    background: var(--color-panel-header);
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--color-border-dark);
 }
-
-.unit svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible; /* 確保光暈可見 */
+.panel-header h3, .panel-header h4 {
+    font-family: var(--font-heading);
+    color: var(--color-accent);
+    text-transform: uppercase;
+    font-size: 1rem;
 }
-
-/* 陣營顏色 */
-.unit.faction-blue .badge-frame { stroke: var(--color-blue); }
-.unit.faction-blue .badge-faction-color { fill: var(--color-blue); }
-.unit.faction-blue.selected { filter: url(#glow-blue); }
-
-.unit.faction-red .badge-frame { stroke: var(--color-red); }
-.unit.faction-red .badge-faction-color { fill: var(--color-red); }
-.unit.faction-red.selected { filter: url(#glow-red); }
-
-/* 單位狀態 */
-.unit.moved-or-acted {
-    opacity: 0.6;
-}
-.unit.dragging {
-    z-index: 1000;
-    opacity: 0.8;
-    transition: none; /* 拖曳時移除動畫 */
-}
-
-/* --- 資訊面板 (Sidebar) --- */
-#info-panel {
-    grid-area: sidebar;
-    background: var(--color-panel);
-    border-left: 2px solid var(--color-border);
-    padding: 15px;
+.panel-content {
+    padding: 10px;
     overflow-y: auto;
+}
+
+/* 左側面板 */
+#left-panel {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 200px;
+    bottom: 0; /* 填滿左側 */
+    background: var(--color-panel-bg);
+    border-right: 2px solid var(--color-border-dark);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
     z-index: 50;
+    display: flex;
+    flex-direction: column;
 }
-#info-panel h3 {
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 10px;
+#left-panel .panel-content {
+    flex-grow: 1;
 }
-#unit-info-content {
-    margin-top: 15px;
+
+/* 右側資訊面板 */
+#info-panel {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 300px;
+    bottom: 0; /* 填滿右側 */
+    background: var(--color-panel-bg);
+    border-left: 2px solid var(--color-border-dark);
+    box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
 }
+#info-panel .panel-content {
+    flex-grow: 1;
+}
+
+/* 底部紀錄面板 */
+#log-panel {
+    position: absolute;
+    bottom: 0;
+    left: 200px; /* 避開左側欄 */
+    right: 300px; /* 避開右側欄 */
+    height: 120px;
+    background: var(--color-panel-bg);
+    border-top: 2px solid var(--color-border-dark);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+}
+#action-log {
+    height: 100%; /* 填滿剩餘空間 */
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* --- 4. 元件 (Components) --- */
+
+/* 按鈕 (HOI 風格) */
+button, .btn-load-game {
+    display: block;
+    width: 100%;
+    background-color: #3a3a3a;
+    background-image: linear-gradient(to bottom, #5a5a5a 0%, #3a3a3a 100%);
+    color: var(--color-text-light);
+    border: 1px solid var(--color-border-dark);
+    border-top-color: var(--color-border-light);
+    padding: 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.7);
+    margin-bottom: 8px;
+    text-align: left;
+}
+button:hover, .btn-load-game:hover {
+    background-image: linear-gradient(to bottom, #6b6b6b 0%, #4c4c4c 100%);
+    color: #fff;
+}
+button:active, .btn-load-game:active {
+    background-image: linear-gradient(to top, #6b6b6b 0%, #4c4c4c 100%);
+    border-color: var(--color-border-dark);
+}
+
+/* 頂部結束回合按鈕 */
+#top-bar #btn-end-turn {
+    background-color: #9c2a2a;
+    background-image: linear-gradient(to bottom, #b04b3a 0%, #9c2a2a 100%);
+    color: #fff;
+    width: auto;
+    margin-bottom: 0;
+    text-align: center;
+}
+#top-bar #btn-end-turn:hover {
+    background-image: linear-gradient(to bottom, #c25e4d 0%, #b04b3a 100%);
+}
+
+#load-game-input { display: none; }
+.controls-vertical .icon {
+    margin-right: 8px;
+    font-family: sans-serif; /* 讓 emoji 正常顯示 */
+}
+
+/* 右側資訊面板 */
 #unit-info-content .unit-name {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1.3rem;
+    font-family: var(--font-heading);
+    margin-bottom: 10px;
 }
 #unit-info-content .unit-name.blue { color: var(--color-blue); }
 #unit-info-content .unit-name.red { color: var(--color-red); }
@@ -182,76 +255,68 @@ html, body {
     margin-top: 10px;
 }
 .stats-grid .stat-item {
-    background: #333;
+    background: #222;
     padding: 8px;
-    border-radius: 4px;
+    border-radius: 2px;
+    border: 1px solid var(--color-border-dark);
 }
 .stat-item label {
     font-size: 0.8rem;
-    color: #aaa;
+    color: var(--color-text-dark);
     display: block;
 }
 .stat-item input {
     width: 100%;
     background: transparent;
     border: none;
-    color: var(--color-text);
+    color: var(--color-text-light);
     font-size: 1rem;
     padding: 5px 0;
     border-bottom: 1px solid #555;
 }
 .stat-item input:focus {
     outline: none;
-    border-bottom: 1px solid var(--color-blue);
+    border-bottom: 1px solid var(--color-accent);
 }
 
+/* 戰鬥預覽 */
 #combat-preview {
-    margin-top: 20px;
-}
-#combat-preview h4 {
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 5px;
+    font-size: 0.9rem;
 }
 
-/* --- 紀錄面板 (Footer) --- */
-#log-panel {
-    grid-area: footer;
-    background: #222;
-    border-top: 1px solid var(--color-border);
-    height: 120px;
-    overflow-y: auto;
-    padding: 10px;
-    font-size: 0.9rem;
-    z-index: 50;
-}
-#action-log p {
-    margin-bottom: 5px;
-    line-height: 1.4;
-}
+/* 行動紀錄 */
+#action-log p { margin-bottom: 5px; }
 #action-log .log-blue { color: var(--color-blue); }
 #action-log .log-red { color: var(--color-red); }
-#action-log .log-system { color: #aaa; }
-#action-log .log-combat { color: #f9a825; font-weight: bold; }
+#action-log .log-system { color: var(--color-text-dark); }
+#action-log .log-combat { color: var(--color-accent); font-weight: bold; }
 
-/* --- 右鍵選單 --- */
+/* 右鍵選單 (HOI 風格) */
 #context-menu {
     position: fixed;
     display: none;
-    background: var(--color-panel);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+    background: var(--color-panel-bg);
+    border: 1px solid var(--color-border-light);
+    border-top: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-dark);
     z-index: 1001;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    min-width: 150px;
 }
-#context-menu ul {
-    list-style: none;
-}
+#context-menu ul { list-style: none; }
 #context-menu li {
     padding: 10px 15px;
     cursor: pointer;
+    color: var(--color-text-light);
 }
 #context-menu li:hover {
-    background: #444;
+    background: var(--color-accent);
+    color: #000;
+}
+#context-menu li.divider {
+    height: 1px;
+    background: var(--color-border-light);
+    padding: 0;
 }
 #context-menu li.disabled {
     color: #777;
@@ -259,27 +324,88 @@ html, body {
     background: transparent;
 }
 
-/* --- 響應式 (簡易) --- */
-@media (max-width: 768px) {
-    #ui-container {
-        grid-template-areas:
-            "header"
-            "main"
-            "sidebar"
-            "footer";
-        grid-template-rows: auto 1fr auto auto;
-        grid-template-columns: 1fr;
+/* --- 5. 單位 (Units) --- */
+.unit {
+    position: absolute;
+    width: var(--hex-size);
+    height: calc(var(--hex-size) * 0.866);
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.2s ease-out;
+}
+.unit svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+/* (徽章的 SVG 樣式不變) */
+.unit.faction-blue .badge-frame { stroke: var(--color-blue); }
+.unit.faction-blue .badge-faction-color { fill: var(--color-blue); }
+.unit.faction-blue.selected { filter: url(#glow-blue); }
+.unit.faction-red .badge-frame { stroke: var(--color-red); }
+.unit.faction-red .badge-faction-color { fill: var(--color-red); }
+.unit.faction-red.selected { filter: url(#glow-red); }
+
+.unit.moved-or-acted {
+    opacity: 0.6;
+    filter: grayscale(50%); /* 增加灰階以符合 HOI 風格 */
+}
+.unit.dragging {
+    z-index: 1000;
+    opacity: 0.8;
+    transition: none;
+}
+
+/* --- 6. 響應式 (RWD) --- */
+@media (max-width: 900px) {
+    /* 在小螢幕上，簡化佈局，左右面板變為浮動或隱藏 */
+    
+    #left-panel {
+        width: 150px; /* 變窄 */
     }
     #info-panel {
-        height: 250px; /* 在行動裝置上給予固定高度 */
-        border-left: none;
-        border-top: 2px solid var(--color-border);
+        width: 250px; /* 變窄 */
+    }
+    
+    #map-container {
+        left: 150px;
+        right: 250px;
+    }
+    
+    #log-panel {
+        left: 150px;
+        right: 250px;
+    }
+    
+    /* (更小的螢幕需要更激進的 RWD，例如將面板改為可切換顯示) */
+}
+
+@media (max-width: 768px) {
+    /* 行動裝置：面板堆疊 */
+    #left-panel {
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        height: 150px; /* 變為底部工具列 */
+        border-right: none;
+        border-top: 2px solid var(--color-border-dark);
+        flex-direction: row;
+        padding: 10px;
+    }
+    #left-panel .controls-vertical {
+        display: flex;
+        gap: 10px;
+    }
+    #info-panel {
+        display: none; /* 暫時隱藏，或改為點擊彈出 */
     }
     #log-panel {
-        height: 100px;
+        display: none; /* 暫時隱藏 */
     }
-    #control-panel {
-        flex-direction: column;
-        gap: 10px;
+    #map-container {
+        left: 0;
+        right: 0;
+        bottom: 150px; /* 避開底部工具列 */
     }
 }
