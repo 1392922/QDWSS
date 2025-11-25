@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兵棋推演：金門之再次823</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <div id="toolbar">
+        <button id="btn-roll-dice">擲骰 (D6)</button>
+        <button id="btn-add-feature">新增地形</button>
+        <button id="btn-add-supply">拉補給線</button>
+        <button id="btn-launch-missile">發射飛彈</button>
+        <span id="scale-indicator">比例尺: 1格 = 1km</span>
+    </div>
+
+    <div id="blue-panel" class="side-panel">
+        <h3><span class="team-color blue"></span>中華民國國軍 (藍軍)</h3>
+        <div id="blue-unit-generator" class="unit-generator">
+            <h4>生成單位</h4>
+            </div>
+        <div id="blue-unit-list" class="unit-list">
+            </div>
+    </div>
+
+    <div id="red-panel" class="side-panel">
+        <h3><span class="team-color red"></span>共軍 (紅軍)</h3>
+        <div id="red-unit-generator" class="unit-generator">
+            <h4>生成單位</h4>
+            </div>
+        <div id="red-unit-list" class="unit-list">
+            </div>
+    </div>
+
+    <div id="unit-editor-modal" class="modal">
+        <div class="modal-content">
+            <h3>編輯算子</h3>
+            <label>名稱: <input type="text" id="edit-name"></label>
+            <label>攻擊: <input type="number" id="edit-atk"></label>
+            <label>防禦: <input type="number" id="edit-def"></label>
+            <label>移動: <input type="number" id="edit-mov"></label>
+            <label>指揮: <input type="number" id="edit-cmd"></label>
+            <label>編制: <select id="edit-echelon"></select></label>
+            <button id="btn-save-unit">儲存</button>
+            <button id="btn-delete-unit">刪除</button>
+            <button id="btn-close-modal">關閉</button>
+        </div>
+    </div>
+
+    <script src="js/map.js"></script>
+    <script src="js/unit.js"></script>
+    <script src="js/mechanics.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
