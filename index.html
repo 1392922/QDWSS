@@ -1,123 +1,37 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-TRF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>金門之再次823 - 兵棋推演</title>
+    <title>台海兵棋推演</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="main-menu">
-        <div class="menu-content">
-            <h1 class="game-title">金門之再次823</h1>
-            <p class="game-subtitle">K-823 WARGAME ENGINE</p>
-            <button id="btn-start-new-game">開始推演</button>
-            <div class="menu-footer">
-                <p>M-001 / VanillaJS 1.0</p>
+    <h1>兵棋推演：基礎地圖</h1>
+
+    <div id="game-board">
+        
+        <div class="unit" id="unit-1" style="grid-column: 3; grid-row: 5;">
+            <div class="unit-stack">
+                <div class="unit-symbol">旅</div>
+                <div class="unit-id">701</div>
             </div>
         </div>
-    </div>
 
-    <div id="ui-container">
-        
-        <header id="control-panel">
-            <div class="panel-left">
-                <h1 class="header-title">作戰指揮部</h1>
+        <div class="unit nato-friendly" id="unit-2" style="grid-column: 4; grid-row: 5;">
+            <div class="unit-stack">
+                <div class="unit-symbol">XX</div>
+                <div class="unit-id">66</div>
             </div>
-            <div class="panel-center">
-                <div id="turn-indicator">
-                    <span>回合: <span id="turn-count">1</span></span>
-                    <span>|</span>
-                    <span>當前行動: <span id="current-player">Blue</span></span>
-                </div>
-            </div>
-            <div class="panel-right controls">
-                <button id="btn-end-turn" title="結束回合">結束回合</button>
-                <button id="btn-save-game" title="儲存戰局">儲存</button>
-                <label for="load-game-input" class="btn-load-game" title="載入戰局">
-                    載入
-                    <input type="file" id="load-game-input" accept=".json">
-                </label>
-                <button id="btn-restart-game" title="重新開始">重啟</button>
-            </div>
-        </header>
-
-        <main id="map-container">
-            <canvas id="map-canvas"></canvas>
-            <div id="unit-layer"></div>
-        </main>
-
-        <aside id="info-panel">
-            <div class="panel-header">
-                <h3>單位情報</h3>
-            </div>
-            <div id="unit-info-content" class="panel-body">
-                <p>請點選一個單位以查看詳細資訊。</p>
-            </div>
-            <div class="panel-header">
-                <h4>戰鬥模擬</h4>
-            </div>
-            <div id="combat-preview" class="panel-body">
-                <div id="combat-preview-content"></div>
-            </div>
-        </aside>
-
-        <footer id="log-panel">
-            <div id="action-log">
-                <p>[系統] 等待作戰指令...</p>
-            </div>
-        </footer>
+        </div>
 
     </div>
 
-    <div id="context-menu">
-        <ul>
-            <li id="menu-move">移動</li>
-            <li id="menu-attack">攻擊</li>
-            <li id="menu-wait">待命</li>
-            <li id="menu-edit">編輯屬性</li>
-            <li id="menu-delete">刪除單位</li>
-        </ul>
+    <div id="info-panel">
+        <p>點選一個算子以查看資訊。</p>
     </div>
 
-    <template id="unit-badge-template">
-        <svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="var(--color-blue)" flood-opacity="1"/>
-                </filter>
-                <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="var(--color-red)" flood-opacity="1"/>
-                </filter>
-            </defs>
-            
-            <path class="badge-frame" 
-                  fill="var(--color-panel-light)" 
-                  stroke-width="4" />
-            
-            <text x="50" y="35" 
-                  font-size="24" 
-                  fill="var(--color-text)" 
-                  text-anchor="middle" 
-                  font-weight="bold"
-                  class="badge-level-symbol">
-                LVL
-            </text>
-
-            <text x="50" y="60" 
-                  font-size="16" 
-                  fill="var(--color-text-dim)" 
-                  text-anchor="middle"
-                  class="badge-unit-type">
-                INF
-            </text>
-            
-            <rect x="20" y="68" width="60" height="8" fill="#111" />
-            <rect x="20" y="68" width="60" height="8" fill="#0f0" class="badge-stats-hp-bar" />
-        </svg>
-    </template>
-
-    <script src="main.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
