@@ -1,379 +1,88 @@
-/* * 樣式表 (HoI/NATO 風格)
- */
-
-/* --- 基本重設與全域設定 --- */
-:root {
-    /* 色票 (仿 HoI/NATO 軍事風格) */
-    --color-blue: #4d94ff;     /* 北約藍 */
-    --color-red: #ff4d4d;       /* 北約紅 */
-    --color-green-hp: #00c853;
-    --color-bg: #1e2124;        /* 深灰背景 */
-    --color-panel: #2a2d31;     /* 面板背景 */
-    --color-panel-light: #36393f; /* 較淺面板 (用於單位) */
-    --color-border: #4f545c;    /* 邊框 */
-    --color-text: #ddd;         /* 主要文字 */
-    --color-text-dim: #999;     /* 次要文字 */
-    --color-highlight: #f9a825; /* 高亮 (黃) */
-
-    --font-main: "Noto Sans TC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-header: "Impact", "Arial Black", sans-serif; /* 仿 HoI 標題 */
-    
-    --hex-size: 50px; /* 六角格半徑 (稍微加大) */
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-main);
-}
-
-button, .btn-load-game {
-    background: var(--color-panel-light);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    padding: 8px 12px;
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    transition: background-color 0.2s, color 0.2s;
-}
-button:hover, .btn-load-game:hover {
-    background: var(--color-border);
-    color: #fff;
-}
-#load-game-input { display: none; }
-
-/* --- 主選單 (新) --- */
-#main-menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--color-bg) url('https://upload.wikimedia.org/wikipedia/commons/5/5f/Contour_map_lines.svg') center/cover;
-    background-blend-mode: overlay;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
-}
-#main-menu.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-.menu-content {
-    text-align: center;
-    background: rgba(42, 45, 49, 0.85);
-    padding: 40px;
-    border: 1px solid var(--color-border);
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
-.game-title {
-    font-family: var(--font-header);
-    font-size: 4rem;
-    color: #fff;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 0px #000;
-}
-.game-subtitle {
-    font-size: 1rem;
-    color: var(--color-text-dim);
-    margin-bottom: 40px;
-    letter-spacing: 1px;
-}
-#btn-start-new-game {
-    font-size: 1.2rem;
-    padding: 15px 30px;
-    background: var(--color-highlight);
-    border-color: #000;
-    color: #000;
-    font-weight: bold;
-}
-#btn-start-new-game:hover {
-    background: #ffc107;
-    color: #000;
-}
-.menu-footer {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    font-size: 0.8rem;
-    color: var(--color-text-dim);
-}
-
-
-/* --- 主 UI 佈局 (仿 HoI) --- */
-#ui-container {
-    display: none; /* 預設隱藏，由 JS 啟動 */
-    grid-template-areas:
-        "header header"
-        "main   sidebar"
-        "footer footer";
-    grid-template-rows: 50px 1fr 120px; /* 頂部 50, 底部 120 */
-    grid-template-columns: 1fr 350px; /* 側邊欄 350px */
-    width: 100vw;
-    height: 100vh;
-}
-
-/* --- 控制面板 (Header) --- */
-#control-panel {
-    grid-area: header;
-    background: var(--color-panel);
-    border-bottom: 2px solid #000;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-}
-.header-title {
-    font-family: var(--font-header);
-    font-size: 1.5rem;
-    color: var(--color-text);
-}
-#turn-indicator {
-    display: flex;
-    gap: 15px;
-    font-size: 1rem;
-    align-items: center;
-}
-#turn-indicator #current-player.blue { color: var(--color-blue); font-weight: bold; }
-#turn-indicator #current-player.red { color: var(--color-red); font-weight: bold; }
-#control-panel .controls {
-    display: flex;
-    gap: 10px;
-}
-#control-panel button, #control-panel .btn-load-game {
-    padding: 6px 10px;
-}
-#btn-end-turn {
-    background: #007acc;
-    border-color: #000;
-    color: #fff;
-    font-weight: bold;
-}
-#btn-end-turn:hover { background: #008fdd; }
-
-/* --- 地圖容器 (Main) --- */
-#map-container {
-    grid-area: main;
-    position: relative;
-    overflow: hidden;
-    background: #000;
-    cursor: grab;
-}
-#map-container:active { cursor: grabbing; }
-
-#map-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-
-#unit-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    transform-origin: 0 0;
-    pointer-events: none;
-}
-
-/* --- NATO 單位徽章 --- */
-.unit {
-    position: absolute;
-    width: var(--hex-size); /* 寬度 50px */
-    height: calc(var(--hex-size) * 0.8); /* 高度 40px */
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-    pointer-events: auto;
-    transition: transform 0.2s ease-out;
-}
-.unit svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-}
-
-/* 核心：根據陣營切換 SVG 外框形狀 (矩形 vs 菱形) */
-.unit.faction-blue .badge-frame {
-    d: path("M5 5 H95 V75 H5 Z"); /* 矩形 (Friendly) */
-    stroke: var(--color-blue);
-}
-.unit.faction-red .badge-frame {
-    d: path("M50 5 L95 40 L50 75 L5 40 Z"); /* 菱形 (Hostile) */
-    stroke: var(--color-red);
-}
-
-/* 選中光暈 */
-.unit.faction-blue.selected { filter: url(#glow-blue); }
-.unit.faction-red.selected { filter: url(#glow-red); }
-
-/* 單位狀態 */
-.unit.moved-or-acted {
-    opacity: 0.5;
-}
-.unit.dragging {
-    z-index: 1000;
-    opacity: 0.8;
-    transition: none;
-}
-
-/* --- 資訊面板 (Sidebar) --- */
-#info-panel {
-    grid-area: sidebar;
-    background: var(--color-panel);
-    border-left: 2px solid #000;
-    z-index: 50;
+/* 基本頁面設定 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
     display: flex;
     flex-direction: column;
-}
-.panel-header {
-    background: #000;
-    padding: 10px 15px;
-}
-.panel-header h3, .panel-header h4 {
-    color: var(--color-highlight);
-    text-transform: uppercase;
-}
-.panel-body {
-    padding: 15px;
-    overflow-y: auto;
-    flex-grow: 1;
+    align-items: center;
+    padding: 20px;
 }
 
-#unit-info-content .unit-name {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-#unit-info-content .unit-name.blue { color: var(--color-blue); }
-#unit-info-content .unit-name.red { color: var(--color-red); }
+/* 遊戲地圖板 */
+#game-board {
+    width: 600px;
+    height: 600px;
+    border: 2px solid #333;
+    background-color: #c8e6c9; /* 簡易的綠色背景 */
 
-#unit-info-content .stats-grid {
+    /* 關鍵：使用 CSS Grid 建立地圖網格 */
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 15px;
-}
-.stats-grid .stat-item {
-    background: var(--color-bg);
-    padding: 8px;
-    border-radius: 2px;
-}
-.stat-item label {
-    font-size: 0.8rem;
-    color: var(--color-text-dim);
-    display: block;
-}
-.stat-item input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--color-text);
-    font-size: 1rem;
-    padding: 5px 0;
-    border-bottom: 1px solid #555;
-    -moz-appearance: textfield; /* 隱藏 number input 的箭頭 */
-}
-.stat-item input::-webkit-outer-spin-button,
-.stat-item input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-.stat-item input:focus {
-    outline: none;
-    border-bottom: 1px solid var(--color-blue);
+    grid-template-columns: repeat(10, 1fr); /* 10 欄 */
+    grid-template-rows: repeat(10, 1fr);    /* 10 列 */
+    
+    /* 加上網格線 */
+    background-image: 
+        linear-gradient(to right, #aaa 1px, transparent 1px),
+        linear-gradient(to bottom, #aaa 1px, transparent 1px);
+    background-size: 60px 60px; /* 600px / 10格 = 60px */
 }
 
-#combat-preview-content ul {
-    list-style: none;
-    padding-left: 10px;
-    margin-top: 5px;
-}
-#combat-preview-content li {
-    color: var(--color-text-dim);
+/* 算子 (Unit) 的基本樣式 */
+.unit {
+    width: 58px;  /* 略小於格子大小 */
+    height: 58px;
+    border: 1px solid #000;
+    box-sizing: border-box; /* 讓邊框包含在寬高內 */
+    cursor: pointer; /* 滑鼠移上去變手指 */
+    transition: transform 0.1s ease; /* 簡易動畫 */
+
+    /* 讓內容置中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 12px;
 }
 
-/* --- 紀錄面板 (Footer) --- */
-#log-panel {
-    grid-area: footer;
-    background: var(--color-panel);
-    border-top: 2px solid #000;
-    height: 120px;
-    overflow-y: auto;
-    padding: 10px;
-    font-size: 0.9rem;
-    z-index: 50;
-}
-#action-log p {
-    margin-bottom: 5px;
-    line-height: 1.4;
-    border-bottom: 1px dashed var(--color-border);
-    padding-bottom: 3px;
-}
-#action-log .log-blue { color: var(--color-blue); }
-#action-log .log-red { color: var(--color-red); }
-#action-log .log-system { color: var(--color-text-dim); }
-#action-log .log-combat { color: var(--color-highlight); font-weight: bold; }
-
-/* --- 右鍵選單 --- */
-#context-menu {
-    position: fixed;
-    display: none;
-    background: var(--color-panel);
-    border: 1px solid var(--color-border);
-    border-radius: 2px;
-    z-index: 1001;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-#context-menu ul { list-style: none; }
-#context-menu li {
-    padding: 10px 15px;
-    cursor: pointer;
-    text-transform: uppercase;
-}
-#context-menu li:hover { background: #444; }
-#context-menu li.disabled {
-    color: #777;
-    cursor: not-allowed;
-    background: transparent;
+/* 算子被點選時的樣式 */
+.unit:hover {
+    transform: scale(1.1);
+    z-index: 10;
 }
 
-/* --- 響應式 (簡易) --- */
-@media (max-width: 768px) {
-    #ui-container {
-        grid-template-areas:
-            "header"
-            "main"
-            "sidebar"
-            "footer";
-        grid-template-rows: auto 1fr auto auto;
-        grid-template-columns: 1fr;
-    }
-    #info-panel {
-        height: 250px;
-        border-left: none;
-        border-top: 2px solid #000;
-    }
-    #log-panel { height: 100px; }
-    #control-panel {
-        flex-direction: column;
-        gap: 10px;
-        height: auto;
-        padding-bottom: 10px;
-    }
-    .header-title { display: none; }
+.unit.selected {
+    border: 3px solid blue;
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.7);
+}
+
+
+/* 算子內部堆疊 (模擬兵棋) */
+.unit-stack {
+    text-align: center;
+    line-height: 1.2;
+}
+.unit-symbol {
+    font-size: 16px;
+    border-bottom: 1px solid #000;
+    padding: 0 5px;
+    margin-bottom: 2px;
+}
+.unit-id {
+    font-size: 14px;
+}
+
+/* 北約 (NATO) 友軍符號樣式 (範例) */
+.nato-friendly {
+    background-color: #b3e5fc; /* 藍色底 */
+    border: 2px solid #01579b;
+}
+
+/* 資訊面板 */
+#info-panel {
+    width: 600px;
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    min-height: 50px;
 }
